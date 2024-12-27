@@ -16,10 +16,10 @@ import (
 
 // Estructura de avión con información de vuelo
 type Aircraft struct {
-	id       int
+	id         int
 	passengers int
-	category string
-	arrival  time.Time
+	category   string
+	arrival    time.Time
 }
 
 // Pistas y puertas del aeropuerto
@@ -40,6 +40,9 @@ func (pq PriorityQueue) Less(i, j int) bool {
 	priorityMap := map[string]int{"A": 1, "B": 2, "C": 3}
 	if pq[i].category != pq[j].category {
 		return priorityMap[pq[i].category] < priorityMap[pq[j].category]
+	}
+	if pq[i].passengers != pq[j].passengers {
+		return pq[i].passengers > pq[j].passengers // Priorizar aviones con más pasajeros
 	}
 	return pq[i].arrival.Before(pq[j].arrival)
 }
@@ -129,30 +132,36 @@ func generateAirplanes(airport *Airport, numA, numB, numC int) {
 
 	// Generación de aviones de cada categoría
 	for i := 0; i < numA; i++ {
+		passengers := rand.Intn(100) + 101
 		aircraftList = append(aircraftList, Aircraft{
-			id:        id,
-			category:  "A",
-			passengers: rand.Intn(100) + 101,
-			arrival:   time.Now(),
+			id:         id,
+			category:   "A",
+			passengers: passengers,
+			arrival:    time.Now(),
 		})
+		fmt.Printf("Generated Aircraft %d from Category A with %d passengers.\n", id, passengers)
 		id++
 	}
 	for i := 0; i < numB; i++ {
+		passengers := rand.Intn(51) + 50
 		aircraftList = append(aircraftList, Aircraft{
-			id:        id,
-			category:  "B",
-			passengers: rand.Intn(51) + 50,
-			arrival:   time.Now(),
+			id:         id,
+			category:   "B",
+			passengers: passengers,
+			arrival:    time.Now(),
 		})
+		fmt.Printf("Generated Aircraft %d from Category B with %d passengers.\n", id, passengers)
 		id++
 	}
 	for i := 0; i < numC; i++ {
+		passengers := rand.Intn(50)
 		aircraftList = append(aircraftList, Aircraft{
-			id:        id,
-			category:  "C",
-			passengers: rand.Intn(50),
-			arrival:   time.Now(),
+			id:         id,
+			category:   "C",
+			passengers: passengers,
+			arrival:    time.Now(),
 		})
+		fmt.Printf("Generated Aircraft %d from Category C with %d passengers.\n", id, passengers)
 		id++
 	}
 
@@ -316,7 +325,7 @@ func manageLandings(airport *Airport) {
 
 // Manejar el aterrizaje de un avión
 func landAircraft(airport *Airport, aircraft Aircraft, runway Runway) {
-	fmt.Printf("Aircraft %d from Category %s is landing on Runway %d.\n", aircraft.id, aircraft.category, runway.id)
+	fmt.Printf("Aircraft %d from Category %s with %d passengers is landing on Runway %d.\n", aircraft.id, aircraft.category, aircraft.passengers, runway.id)
 	landingTime := time.Duration(rand.Intn(3)+1) * time.Second
 	time.Sleep(landingTime)
 	fmt.Printf("Aircraft %d landed and moving to gate.\n", aircraft.id)
@@ -324,7 +333,7 @@ func landAircraft(airport *Airport, aircraft Aircraft, runway Runway) {
 	// Asignar puerta
 	select {
 	case gate := <-airport.gates:
-		fmt.Printf("Gate %d: Aircraft %d assigned.\n", gate.id, aircraft.id)
+		fmt.Printf("Gate %d: Aircraft %d assigned with %d passengers.\n", gate.id, aircraft.id, aircraft.passengers)
 		go handleGate(airport, aircraft, gate)
 	default:
 		fmt.Printf("No gates available for Aircraft %d. Waiting...\n", aircraft.id)
@@ -344,7 +353,7 @@ func landAircraft(airport *Airport, aircraft Aircraft, runway Runway) {
 
 // Manejar el desembarque del avión en la puerta
 func handleGate(airport *Airport, aircraft Aircraft, gate Gate) {
-	fmt.Printf("Gate %d: Aircraft %d starting disembarkation.\n", gate.id, aircraft.id)
+	fmt.Printf("Gate %d: Aircraft %d with %d passengers starting disembarkation.\n", gate.id, aircraft.id, aircraft.passengers)
 	disembarkTime := time.Duration(rand.Intn(3)+1) * time.Second
 	time.Sleep(disembarkTime)
 	fmt.Printf("Gate %d: Aircraft %d disembarked.\n", gate.id, aircraft.id)
